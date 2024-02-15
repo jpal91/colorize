@@ -2,7 +2,7 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
     let mut it = tag.chars().peekable();
     let mut attr: Vec<&str> = vec![];
     let mut newline = "";
-    let input = format!("{:?}", input).replace("\"", "");
+    let input = format!("{:?}", input).replace('\"', "");
 
     while let Some(m) = it.next() {
         match m {
@@ -17,7 +17,7 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
                         'c' => "36",
                         'w' => "37",
                         'k' => "30",
-                        _ => ""
+                        _ => "",
                     };
                     if !col.is_empty() {
                         it.next();
@@ -31,25 +31,31 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
             'N' => newline = "\n",
             _ => {}
         }
-    };
+    }
 
     format!("{}\x1b[{}m{}\x1b[0m", newline, attr.join(";"), input)
 }
 
-
-/// ## Usage 
-/// `colorize!(token->"str", ...)`
-/// 
+/// Adds ANSI color escape sequences to Strings
+///
+/// ## Usage
+///
+/// `colorize!` takes a series of inputs, with or without tokens, and converts the inputs into a `String` with ANSI escape sequences added in.
+///
+/// The returned `String` is primarily useful for printing out to a terminal which is capable of showing color.
+/// However, if all you want to do is print, and want to cut out the extra code, use [`print_color`] instead.
+///
 /// ## Tokens
-/// Tokens can change color or font styling depending on their order and usage
-/// 
-/// ### Styling
+/// Tokens can change color or font styling depending on their order and usage.
+///
+/// #### Styling
 ///     1. b -> bold
 ///     2. u -> underline
 ///     3. i -> italic
-/// 
-/// ### Color
+///
+/// #### Color
 /// Color tokens start with an `F` (for foreground)
+///
 ///     1. Fb -> blue
 ///     2. Fr -> red
 ///     3. Fg -> green
@@ -58,16 +64,32 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 ///     6. Fc -> cyan
 ///     7. Fw -> white
 ///     8. Fk -> black
-/// 
+///
+/// #### Special Newline Token
+/// If you want to add a newline  within the string, include a `N` token at the start
+/// of the word(s) you wish to be on the newline.
+///
+/// **Adding the actual `\n` character will cause issues, use the token!!**
+///
+///
+/// Example -
+/// ```
+/// let color_string = colorize!(
+///     b->"Hello", // First line
+///     Nb->"world, it's me!" // "world..." will be on the new line
+/// )
+/// ```
+///
 /// ### Examples
 /// ```
 /// // Returns "Hello" in bold green
 /// let color_string = colorize!(Fgb->"Hello");
 /// assert_eq!(String::from("\x1b[1;32mHello\x1b[0m"), color_string);
-/// 
+///
 /// // Returns "Hello" in italic blue and "World" underlined in magenta
-/// let color_string = colorize!(iFb->"Hello", Fmu->"World");
-/// assert_eq!(String::from("\x1b[3;34mHello\x1b[0m \x1b[4;35mWorld\x1b[0m"), color_string);
+/// // ", it's me" will be unformatted
+/// let color_string = colorize!(iFb->"Hello", Fmu->"world", ", it's me!");
+/// assert_eq!(String::from("\x1b[3;34mHello\x1b[0m \x1b[4;35mworld\x1b[0m , it's me!"), color_string);
 /// ```
 #[macro_export]
 macro_rules! colorize {
@@ -92,9 +114,16 @@ macro_rules! colorize {
     ( $($any:tt)* ) => { colorize!([]; $($any)* ) };
 }
 
-/// `println` using the `colorize` macro
-/// 
+/// `println` using the [`colorize!`] macro
+///
+///
 /// See [`colorize!`] for more details
+///
+/// ## Usage
+/// ```
+/// // Will println to the console with "Hello" bold and green, world will be unformatted
+/// print_color!(Fgb->"Hello", "world")
+/// ```
 #[macro_export]
 macro_rules! print_color {
     () => (println!(""));
@@ -115,7 +144,8 @@ mod tests {
 
     #[test]
     fn test_colorize() {
-        let col_str = colorize!(Fgb->"hello again", N->"hello", "and", FrFb->"goodbye", b->"again" );
+        let col_str =
+            colorize!(Fgb->"hello again", N->"hello", "and", FrFb->"goodbye", b->"again" );
         assert_eq!(
             String::from("\x1b[32;1mhello again\x1b[0m \n\x1b[mhello\x1b[0m and \x1b[31;34mgoodbye\x1b[0m \x1b[1magain\x1b[0m"),
             col_str
@@ -129,5 +159,4 @@ mod tests {
         let col = colorize!(b->"Moving", Fgb->path, b->"to");
         println!("{}", col);
     }
-
 }

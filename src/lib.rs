@@ -109,18 +109,21 @@ mod tests {
 
     #[test]
     fn test_print_color() {
-        print_color!(Fr->"testing", Fbbi->"testing1", b->"testing2{}", x->"testing3", "testing4", Fgbu->"testing5");
+        print_color!(Fr->"testing", Fbbi->"testing1", b->"testing2", x->"testing3", "testing4", Fgbu->"testing5");
         print_color!("hello");
     }
 
     #[test]
     fn test_colorize() {
-        let col = colorize!(Fgb->"hello again", N->"hello", "and", FrFb->"goodbye", "again" );
-        println!("{}", col)
+        let col_str = colorize!(Fgb->"hello again", N->"hello", "and", FrFb->"goodbye", b->"again" );
+        assert_eq!(
+            String::from("\x1b[32;1mhello again\x1b[0m \n\x1b[mhello\x1b[0m and \x1b[31;34mgoodbye\x1b[0m \x1b[1magain\x1b[0m"),
+            col_str
+        )
     }
 
     #[test]
-    fn test_path_buf() {
+    fn test_debug() {
         use std::path::PathBuf;
         let path = PathBuf::from_str("some").unwrap();
         let col = colorize!(b->"Moving", Fgb->path, b->"to");

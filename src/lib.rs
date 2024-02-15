@@ -24,7 +24,7 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
                         attr.push(col)
                     }
                 }
-            },
+            }
             'b' => attr.push("1"),
             'i' => attr.push("3"),
             'u' => attr.push("4"),
@@ -49,21 +49,21 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 /// Tokens can change color or font styling depending on their order and usage.
 ///
 /// #### Styling
-///     1. b -> bold
-///     2. u -> underline
-///     3. i -> italic
+/// 1. b -> bold
+/// 2. u -> underline
+/// 3. i -> italic
 ///
 /// #### Color
 /// Color tokens start with an `F` (for foreground)
 ///
-///     1. Fb -> blue
-///     2. Fr -> red
-///     3. Fg -> green
-///     4. Fy -> yellow
-///     5. Fm -> magenta
-///     6. Fc -> cyan
-///     7. Fw -> white
-///     8. Fk -> black
+/// 1. Fb -> blue
+/// 2. Fr -> red
+/// 3. Fg -> green
+/// 4. Fy -> yellow
+/// 5. Fm -> magenta
+/// 6. Fc -> cyan
+/// 7. Fw -> white
+/// 8. Fk -> black
 ///
 /// #### Special Newline Token
 /// If you want to add a newline  within the string, include a `N` token at the start
@@ -74,22 +74,26 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 ///
 /// Example -
 /// ```
+/// use colorize::colorize;
+///
 /// let color_string = colorize!(
 ///     b->"Hello", // First line
 ///     Nb->"world, it's me!" // "world..." will be on the new line
-/// )
+/// );
 /// ```
 ///
 /// ### Examples
 /// ```
+/// use colorize::colorize;
+///
 /// // Returns "Hello" in bold green
 /// let color_string = colorize!(Fgb->"Hello");
-/// assert_eq!(String::from("\x1b[1;32mHello\x1b[0m"), color_string);
+/// assert_eq!(String::from("\x1b[32;1mHello\x1b[0m"), color_string);
 ///
 /// // Returns "Hello" in italic blue and "World" underlined in magenta
 /// // ", it's me" will be unformatted
 /// let color_string = colorize!(iFb->"Hello", Fmu->"world", ", it's me!");
-/// assert_eq!(String::from("\x1b[3;34mHello\x1b[0m \x1b[4;35mworld\x1b[0m , it's me!"), color_string);
+/// assert_eq!(String::from("\x1b[3;34mHello\x1b[0m \x1b[35;4mworld\x1b[0m , it's me!"), color_string);
 /// ```
 #[macro_export]
 macro_rules! colorize {
@@ -121,13 +125,15 @@ macro_rules! colorize {
 ///
 /// ## Usage
 /// ```
+/// use colorize::*;
+///
 /// // Will println to the console with "Hello" bold and green, world will be unformatted
 /// print_color!(Fgb->"Hello", "world")
 /// ```
 #[macro_export]
 macro_rules! print_color {
     () => (println!(""));
-    ( $($any:tt)* ) => ( println!("{}", colorize!([]; $($any)*)) );
+    ( $($any:tt)* ) => ( println!("{}", $crate::colorize!([]; $($any)*)) );
 }
 
 #[cfg(test)]

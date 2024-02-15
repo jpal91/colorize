@@ -37,8 +37,6 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 }
 
 
-/// Inspired by the [row](https://github.com/phsym/prettytable-rs/blob/master/src/row.rs) macro in [prettytable](https://github.com/phsym/prettytable-rs)
-/// 
 /// ## Usage 
 /// `colorize!(token->"str", ...)`
 /// 

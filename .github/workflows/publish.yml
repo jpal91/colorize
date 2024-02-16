@@ -1,0 +1,25 @@
+name: Publish
+
+on:
+  release:
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Publish
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --verbose --all-features --token ${{ secrets.CARGO_TOKEN }}

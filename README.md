@@ -1,3 +1,6 @@
+![Crates.io Version](https://img.shields.io/crates/v/colorize-macros)
+
+
 # colorize
 
 A set of Rust macros to assist in turning text into colors for printing on the terminal. 

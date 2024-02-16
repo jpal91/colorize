@@ -1,7 +1,5 @@
 //! A set of Rust macros to assist in turning text into colors for printing on the terminal.
 //!
-//! Originally inspired by the [row](https://github.com/phsym/prettytable-rs/blob/master/src/row.rs) macro in [prettytable](https://github.com/phsym/prettytable-rs).
-//!
 //! ```
 //! use colorize::{colorize, print_color};
 //!
@@ -14,6 +12,9 @@
 //! // Prints "Hello" with yellow letters, "world" with blue letters and underlined
 //! print_color!(Fy->"Hello", Bbu->"world");
 //! ```
+//!
+//! #### Special Thanks
+//! This crate was originally inspired by the [row](https://github.com/phsym/prettytable-rs/blob/master/src/row.rs) macro in [prettytable](https://github.com/phsym/prettytable-rs).
 
 /// Helper function called by [`colorize!`] to convert tokens/string to color text
 ///

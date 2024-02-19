@@ -2,15 +2,25 @@ name: Checks
 
 on:
   push:
-    paths-ignore:
-      - "README.md"
   pull_request:
-    paths-ignore:
-      - "README.md"
   workflow_dispatch:
 
 jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          concurrent_skipping: 'same_content_newer'
+          skip_after_successful_duplicate: 'true'
+          paths_ignore: '["**/README.md", ".gitignore"]'
+
   check:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     name: Check
     runs-on: ubuntu-latest
     steps:
@@ -31,6 +41,8 @@ jobs:
           command: check
 
   test:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     name: Test Suite
     runs-on: ubuntu-latest
     steps:
@@ -51,6 +63,8 @@ jobs:
           command: test
 
   lints:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     name: Lints
     runs-on: ubuntu-latest
     steps:

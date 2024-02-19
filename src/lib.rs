@@ -16,6 +16,9 @@
 //! #### Special Thanks
 //! This crate was originally inspired by the [row](https://github.com/phsym/prettytable-rs/blob/master/src/row.rs) macro in [prettytable](https://github.com/phsym/prettytable-rs).
 
+#[allow(unused)]
+use paste::paste;
+
 /// Helper function called by [`colorize!`] to convert tokens/string to color text
 ///
 /// This function is not strictly needed for usage of this crate, but is made available in case.
@@ -92,7 +95,7 @@ macro_rules! _colorize {
     ( [ $($acc:tt)* ]; $msg:expr, $($rest:tt)* ) => {_colorize!([$($acc)* $msg.to_string() ,]; $($rest)*)};
 
     ( [ $($acc:tt)* ]; $tag:ident => $id:ident -> $msg:expr, $($rest:tt)*) => {
-        paste::paste!{
+        paste!{
             {
                 let color = $crate::color_str( $msg, stringify!([<$tag $id>]));
                 _colorize!(

@@ -1,6 +1,6 @@
 [package]
 name = "colorize-macros"
-version = "0.6.3"
+version = "0.6.4"
 edition = "2021"
 description = "A set of Rust macros to assist in turning text into colors for printing on the terminal."
 readme = "README.md"

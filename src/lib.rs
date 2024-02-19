@@ -1,6 +1,7 @@
 //! A set of Rust macros to assist in turning text into colors for printing on the terminal.
 //!
-//! ```ignore
+//! ```
+//! # use colorize::_colorize;
 //! use colorize::{colorize, print_color};
 //!
 //! // Convert text into a String with colors
@@ -81,6 +82,8 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
     format!("{}\x1b[{}m{}\x1b[0m", newline, attr.join(";"), input)
 }
 
+#[doc(hidden)]
+#[macro_export]
 macro_rules! _colorize {
 
     () => {String::new()};
@@ -158,7 +161,8 @@ macro_rules! _colorize {
 /// **Adding the actual `\n` character will cause issues, use the token!!**
 ///
 /// Example -
-/// ```ignore
+/// ```
+/// # use colorize::_colorize;
 /// use colorize::colorize;
 ///
 /// let color_string = colorize!(
@@ -167,8 +171,21 @@ macro_rules! _colorize {
 /// );
 /// ```
 ///
+/// #### Fomrat Multiple Inputs
+/// You also have the ability to apply a token to multiple inputs by using `=>` at the beginning of the call.
+///
+/// ```
+/// # use colorize::_colorize;
+/// # use paste::paste;
+/// use colorize::colorize;
+///
+/// let color_string = colorize!(b => Fg->"Hello", By->"world");
+/// ```
+/// In the above example, "Hello" will have a green foreground, and "world" will have a yellow background. The preceeding `b =>` applies bold formatting to both.
+///
 /// ### Examples
-/// ```ignore
+/// ```
+/// # use colorize::_colorize;
 /// use colorize::colorize;
 ///
 /// // Returns "Hello" in bold green
@@ -182,7 +199,7 @@ macro_rules! _colorize {
 /// ```
 #[macro_export]
 macro_rules! colorize {
-    ( $($any:tt)* ) => { _colorize!([]; $($any)*, ) };
+    ( $($any:tt)* ) => { $crate::_colorize!([]; $($any)*, ) };
 }
 
 /// `println!` using the [`colorize!`] macro
@@ -191,8 +208,9 @@ macro_rules! colorize {
 /// See [`colorize!`] for more details
 ///
 /// ## Usage
-/// ```ignore
-/// use colorize::*;
+/// ```
+/// # use colorize::{colorize, _colorize};
+/// use colorize::print_color;
 ///
 /// // Will println to the console with "Hello" bold and green, world will be unformatted
 /// print_color!(Fgb->"Hello", "world")

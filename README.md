@@ -37,12 +37,26 @@ assert_eq!(
 );
 
 // Add a format token to multiple inputs using `=>`
-// The below example will produce "Hello" with a green foreground, "world" with a blue background, both in bold. 
+// The below example will produce "Hello" with a green foreground, 
+// "world" with a blue background, both in bold. 
 let color_string = colorize!(b => Fg->"Hello", Bb->"world");
 assert_eq!(
     String::from("\x1b[1;32mHello\x1b[0m \x1b[1;44mworld\x1b[0m"),
     color_string
 );
+
+// Inputs can be anything that implements the Debug trait
+use std::path::PathBuf;
+
+let user_path = PathBuf::from("/home/color/my_new_file.txt");
+let pretty_path = colorize!(Fgu->user_path.clone());
+
+assert_eq!(
+    String::from("\x1b[32;4m/home/color/my_new_file.txt\x1b[0m"),
+    pretty_path
+);
+
+print_color!(b => "Moving", Fy->user_path, "to", Fg->PathBuf::from("/home/new_color_dir/my_second_file.txt"));
 ```
 
 See the [colorize macro](https://docs.rs/colorize-macros/latest/colorize/macro.colorize.html) docs for further style specs.

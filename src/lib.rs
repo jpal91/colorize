@@ -27,6 +27,7 @@
 #[macro_use]
 mod macros;
 
+#[doc(hidden)]
 #[allow(unused)]
 pub use paste::paste;
 
@@ -92,7 +93,7 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
     format!("{}\x1b[{}m{}\x1b[0m", newline, attr.join(";"), input)
 }
 
-/// Adds ANSI color escape sequences to Strings
+/// Adds ANSI color escape sequences to inputs
 ///
 /// ## Usage
 ///
@@ -100,6 +101,22 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 ///
 /// The returned `String` is primarily useful for printing out to a terminal which is capable of showing color.
 /// However, if all you want to do is print, and want to cut out the extra code, use [`print_color`] instead.
+///
+/// ## Valid inputs
+/// `colorize!` should be able to take any input that implements the [`Debug`](std::fmt::Debug) trait. It will proactively strip any quotation marks for a prettier output.
+///
+/// ```
+/// use std::path::PathBuf;
+/// use colorize::colorize;
+///
+/// let user_path = PathBuf::from("/home/color/my_new_file.txt");
+/// let pretty_path = colorize!(Fgu->user_path.clone());
+///
+/// assert_eq!(
+///     String::from("\x1b[32;4m/home/color/my_new_file.txt\x1b[0m"),
+///     pretty_path
+/// );
+/// ```
 ///
 /// ## Tokens
 /// Tokens can change color or font styling depending on their order and usage.
@@ -129,7 +146,6 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 ///
 /// Example -
 /// ```
-///
 /// use colorize::colorize;
 ///
 /// let color_string = colorize!(
@@ -138,11 +154,10 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 /// );
 /// ```
 ///
-/// #### Fomrat Multiple Inputs
+/// #### Format Multiple Inputs
 /// You also have the ability to apply a token to multiple inputs by using `=>` at the beginning of the call.
 ///
 /// ```
-///
 /// use colorize::colorize;
 ///
 /// let color_string = colorize!(b => Fg->"Hello", By->"world");
@@ -221,7 +236,12 @@ mod tests {
     fn test_debug() {
         use std::path::PathBuf;
         let path = PathBuf::from_str("some").unwrap();
-        let col = colorize!(b->"Moving", Fgb->path, b->"to");
-        println!("{}", col);
+        let col = colorize!(b->"Moving", Fgb->path.clone(), b->"to");
+        assert_eq!(
+            String::from("\x1b[1mMoving\x1b[0m \x1b[32;1msome\x1b[0m \x1b[1mto\x1b[0m"),
+            col
+        );
+
+        print_color!(b => "Moving", Fg->path, "to", Fg->PathBuf::from("other"))
     }
 }

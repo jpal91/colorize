@@ -2,12 +2,21 @@
 //!
 //! ```
 //! # use colorize::_colorize;
+//! # use paste::paste;
 //! use colorize::{colorize, print_color};
 //!
 //! // Convert text into a String with colors
 //! // Returns "Hello" with a red background and green foreground color, combined with "world" in bold, separated by a space
 //! let color_string = colorize!(BrFg->"Hello", b->"world");
 //! assert_eq!(String::from("\x1b[41;32mHello\x1b[0m \x1b[1mworld\x1b[0m"), color_string);
+//!
+//! // Add a format token to multiple inputs using `=>`
+//! // The below example will produce "Hello" with a green foreground, "world" with a blue background, both in bold.
+//! let color_string = colorize!(b => Fg->"Hello", Bb->"world");
+//! assert_eq!(
+//!     String::from("\x1b[1;32mHello\x1b[0m \x1b[1;44mworld\x1b[0m"),
+//!     color_string
+//! );
 //!
 //! // println a color string
 //! // Prints "Hello" with yellow letters, "world" with blue letters and underlined
@@ -16,9 +25,6 @@
 //!
 //! #### Special Thanks
 //! This crate was originally inspired by the [row](https://github.com/phsym/prettytable-rs/blob/master/src/row.rs) macro in [prettytable](https://github.com/phsym/prettytable-rs).
-
-#[allow(unused)]
-use paste::paste;
 
 /// Helper function called by [`colorize!`] to convert tokens/string to color text
 ///
@@ -98,7 +104,7 @@ macro_rules! _colorize {
     ( [ $($acc:tt)* ]; $msg:expr, $($rest:tt)* ) => {_colorize!([$($acc)* $msg.to_string() ,]; $($rest)*)};
 
     ( [ $($acc:tt)* ]; $tag:ident => $id:ident -> $msg:expr, $($rest:tt)*) => {
-        paste!{
+        paste::paste!{
             {
                 let color = $crate::color_str( $msg, stringify!([<$tag $id>]));
                 _colorize!(
@@ -225,7 +231,7 @@ macro_rules! print_color {
 mod tests {
     use std::str::FromStr;
 
-    use super::*;
+    use super::{colorize, print_color};
 
     #[test]
     fn test_print_color() {

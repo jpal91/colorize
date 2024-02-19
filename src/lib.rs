@@ -27,6 +27,9 @@
 #[macro_use]
 mod macros;
 
+#[allow(unused)]
+pub use paste::paste;
+
 /// Helper function called by [`colorize!`] to convert tokens/string to color text
 ///
 /// This function is not strictly needed for usage of this crate, but is made available in case.

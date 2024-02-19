@@ -14,7 +14,7 @@ macro_rules! macro_colorize {
     ( [ $($acc:tt)* ]; $msg:expr, $($rest:tt)* ) => {$crate::macro_colorize!([$($acc)* $msg.to_string() ,]; $($rest)*)};
 
     ( [ $($acc:tt)* ]; $tag:ident => $id:ident -> $msg:expr, $($rest:tt)*) => {
-        paste::paste!{
+        $crate::paste!{
             {
                 let color = $crate::color_str( $msg, stringify!([<$tag $id>]));
                 $crate::macro_colorize!(

@@ -1,6 +1,7 @@
 //! A set of Rust macros to assist in turning text into colors for printing on the terminal.
 //!
 //! ```
+//! # use colorize::_colorize;
 //! use colorize::{colorize, print_color};
 //!
 //! // Convert text into a String with colors
@@ -15,6 +16,9 @@
 //!
 //! #### Special Thanks
 //! This crate was originally inspired by the [row](https://github.com/phsym/prettytable-rs/blob/master/src/row.rs) macro in [prettytable](https://github.com/phsym/prettytable-rs).
+
+#[allow(unused)]
+use paste::paste;
 
 /// Helper function called by [`colorize!`] to convert tokens/string to color text
 ///
@@ -78,6 +82,49 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
     format!("{}\x1b[{}m{}\x1b[0m", newline, attr.join(";"), input)
 }
 
+#[doc(hidden)]
+#[macro_export]
+macro_rules! _colorize {
+
+    () => {String::new()};
+
+    ( [ $($acc:tt)* ]; $tag:ident -> $msg:expr, $($rest:tt)* ) => {
+        {
+            let color = $crate::color_str( $msg , stringify!($tag));
+            _colorize!([ $($acc)* color, ]; $($rest)* )
+        }
+    };
+
+    ( [ $($acc:tt)* ]; $msg:expr, $($rest:tt)* ) => {_colorize!([$($acc)* $msg.to_string() ,]; $($rest)*)};
+
+    ( [ $($acc:tt)* ]; $tag:ident => $id:ident -> $msg:expr, $($rest:tt)*) => {
+        paste!{
+            {
+                let color = $crate::color_str( $msg, stringify!([<$tag $id>]));
+                _colorize!(
+                    [$($acc)* color,]; $tag => $($rest)*
+                )
+            }
+        }
+    };
+
+    ( [ $($acc:tt)* ]; $tag:ident => $msg:expr, $($rest:tt)*) => {
+        {
+            let color = $crate::color_str( $msg, stringify!($tag));
+            _colorize!(
+                [$($acc)* color,]; $tag => $($rest)*
+            )
+        }
+    };
+
+    ( [ $($acc:tt)* ]; $tag:ident => $(,)*) => {
+        [$($acc)*].join(" ")
+    };
+
+    ( [ $($acc:tt)* ]; $(,)*) =>  { [$($acc)*].join(" ") };
+
+}
+
 /// Adds ANSI color escape sequences to Strings
 ///
 /// ## Usage
@@ -115,6 +162,7 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 ///
 /// Example -
 /// ```
+/// # use colorize::_colorize;
 /// use colorize::colorize;
 ///
 /// let color_string = colorize!(
@@ -123,8 +171,21 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 /// );
 /// ```
 ///
+/// #### Fomrat Multiple Inputs
+/// You also have the ability to apply a token to multiple inputs by using `=>` at the beginning of the call.
+///
+/// ```
+/// # use colorize::_colorize;
+/// # use paste::paste;
+/// use colorize::colorize;
+///
+/// let color_string = colorize!(b => Fg->"Hello", By->"world");
+/// ```
+/// In the above example, "Hello" will have a green foreground, and "world" will have a yellow background. The preceeding `b =>` applies bold formatting to both.
+///
 /// ### Examples
 /// ```
+/// # use colorize::_colorize;
 /// use colorize::colorize;
 ///
 /// // Returns "Hello" in bold green
@@ -138,25 +199,7 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 /// ```
 #[macro_export]
 macro_rules! colorize {
-
-    () => {String::new()};
-
-    ( [ $($acc:tt)* ]; $tag:ident -> $msg:expr, $($rest:tt)* ) => {
-        {
-            let color = $crate::color_str( $msg , stringify!($tag));
-            colorize!([ $($acc)* color, ]; $($rest)* )
-        }
-    };
-
-    ( [ $($acc:tt)* ]; $msg:expr, $($rest:tt)* ) => {colorize!([$($acc)* $msg.to_string() ,]; $($rest)*)};
-
-    ( [ $($acc:tt)* ]; $tag:ident -> $msg:expr ) => {colorize!([$($acc)*]; $tag -> $msg , )};
-
-    ( [ $($acc:tt)* ]; $msg:expr ) => {colorize!([$($acc)* $msg.to_string() ,]; )};
-
-    ( [ $($acc:tt)* ]; ) =>  { [$($acc)*].join(" ") };
-
-    ( $($any:tt)* ) => { colorize!([]; $($any)* ) };
+    ( $($any:tt)* ) => { $crate::_colorize!([]; $($any)*, ) };
 }
 
 /// `println!` using the [`colorize!`] macro
@@ -166,7 +209,8 @@ macro_rules! colorize {
 ///
 /// ## Usage
 /// ```
-/// use colorize::*;
+/// # use colorize::{colorize, _colorize};
+/// use colorize::print_color;
 ///
 /// // Will println to the console with "Hello" bold and green, world will be unformatted
 /// print_color!(Fgb->"Hello", "world")
@@ -174,7 +218,7 @@ macro_rules! colorize {
 #[macro_export]
 macro_rules! print_color {
     () => (println!(""));
-    ( $($any:tt)* ) => ( println!("{}", $crate::colorize!([]; $($any)*)) );
+    ( $($any:tt)* ) => ( println!("{}", $crate::colorize!($($any)*)) );
 }
 
 #[cfg(test)]
@@ -195,6 +239,16 @@ mod tests {
             colorize!(Fgb->"hello again", N->"hello", "and", BrFb->"goodbye", b->"again" );
         assert_eq!(
             String::from("\x1b[32;1mhello again\x1b[0m \n\x1b[mhello\x1b[0m and \x1b[41;34mgoodbye\x1b[0m \x1b[1magain\x1b[0m"),
+            col_str
+        )
+    }
+
+    #[test]
+    fn test_colorize_all() {
+        let col_str = colorize!(b => Fg->"One", "two", Fb->"three");
+
+        assert_eq!(
+            String::from("\x1b[1;32mOne\x1b[0m \x1b[1mtwo\x1b[0m \x1b[1;34mthree\x1b[0m"),
             col_str
         )
     }

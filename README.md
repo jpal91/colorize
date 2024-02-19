@@ -28,7 +28,7 @@ See the [colorize macro](https://docs.rs/colorize-macros/latest/colorize/macro.c
 ## Development
 - [x] Add background color
 - [ ] Rework the `colorize!` macro or create a new macro so it acts more like `format!`
-- [ ] Add ability to format multiple arguments with the same input (ie `colorize!(b => "Hello", Fg-> "world")` where "Hello" and "world" are both bold but "world" is the only word that's green)
+- [x] Add ability to format multiple arguments with the same input (ie `colorize!(b => "Hello", Fg-> "world")` where "Hello" and "world" are both bold but "world" is the only word that's green)
 - [ ] Integrate a color set of log macros from the [log](https://docs.rs/log/latest/log/) crate
 
 ## Special Thanks

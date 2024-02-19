@@ -1,4 +1,5 @@
-[![Crates.io Version](https://img.shields.io/crates/v/colorize-macros)](https://crates.io/crates/colorize-macros)
+[![crates.io](https://img.shields.io/crates/v/colorize-macros?style=for-the-badge&logo=rust)](https://crates.io/crates/colorize-macros)
+[![docs.rs](https://img.shields.io/badge/docs.rs-colorize--macros-mediumslateblue?style=for-the-badge&logo=docs.rs)](https://docs.rs/colorize-macros/latest/colorize)
 
 
 # colorize

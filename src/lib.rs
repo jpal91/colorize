@@ -16,6 +16,9 @@
 //! #### Special Thanks
 //! This crate was originally inspired by the [row](https://github.com/phsym/prettytable-rs/blob/master/src/row.rs) macro in [prettytable](https://github.com/phsym/prettytable-rs).
 
+#[allow(unused)]
+use paste::paste;
+
 /// Helper function called by [`colorize!`] to convert tokens/string to color text
 ///
 /// This function is not strictly needed for usage of this crate, but is made available in case.
@@ -150,13 +153,39 @@ macro_rules! colorize {
 
     ( [ $($acc:tt)* ]; $msg:expr, $($rest:tt)* ) => {colorize!([$($acc)* $msg.to_string() ,]; $($rest)*)};
 
-    ( [ $($acc:tt)* ]; $tag:ident -> $msg:expr ) => {colorize!([$($acc)*]; $tag -> $msg , )};
+    ( [ $($acc:tt)* ]; $tag:ident => $id:ident -> $msg:expr, $($rest:tt)*) => {
+        paste!{
+            {
+                let color = $crate::color_str( $msg, stringify!([<$tag $id>]));
+                colorize!(
+                    [$($acc)* color,]; $tag => $($rest)*
+                )
+            }
+        }
+    };
 
-    ( [ $($acc:tt)* ]; $msg:expr ) => {colorize!([$($acc)* $msg.to_string() ,]; )};
+    ( [ $($acc:tt)* ]; $tag:ident => $msg:expr, $($rest:tt)*) => {
 
-    ( [ $($acc:tt)* ]; ) =>  { [$($acc)*].join(" ") };
+        {
+            let color = $crate::color_str( $msg, stringify!($tag));
+            colorize!(
+                [$($acc)* color,]; $tag => $($rest)*
+            )
+        }
 
-    ( $($any:tt)* ) => { colorize!([]; $($any)* ) };
+    };
+
+    ( [ $($acc:tt)* ]; $tag:ident => $(,)*) => {
+        [$($acc)*].join(" ")
+    };
+
+    ( [ $($acc:tt)* ]; $(,)*) =>  { [$($acc)*].join(" ") };
+
+    ( $tag:ident => $($rest:tt)* ) => {
+        colorize!([]; $tag => $($rest)*,)
+    };
+
+    ( $($any:tt)* ) => { colorize!([]; $($any)*, ) };
 }
 
 /// `println!` using the [`colorize!`] macro
@@ -174,7 +203,7 @@ macro_rules! colorize {
 #[macro_export]
 macro_rules! print_color {
     () => (println!(""));
-    ( $($any:tt)* ) => ( println!("{}", $crate::colorize!([]; $($any)*)) );
+    ( $($any:tt)* ) => ( println!("{}", $crate::colorize!($($any)*)) );
 }
 
 #[cfg(test)]
@@ -197,6 +226,15 @@ mod tests {
             String::from("\x1b[32;1mhello again\x1b[0m \n\x1b[mhello\x1b[0m and \x1b[41;34mgoodbye\x1b[0m \x1b[1magain\x1b[0m"),
             col_str
         )
+    }
+
+    #[test]
+    fn test_colorize_all() {
+        // let m = merge_idents!(b; "some");
+
+        let col_str = colorize!(b => Fg->"Some", "else", Fb->"some",);
+        // print_color!(b => Fg->"some",);
+        println!("{}", col_str)
     }
 
     #[test]

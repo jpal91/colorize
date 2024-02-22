@@ -1,5 +1,8 @@
+#![allow(unused)]
 use proc_colorize::colorize;
 
 fn main() {
-    colorize!(Fg->"Some")
+    let my_str = "hello";
+    let res = colorize!(Fn->"none", "some", my_str, String::from("good"));
+    println!("{}", res);
 }

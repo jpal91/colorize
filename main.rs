@@ -3,6 +3,6 @@ use proc_colorize::colorize;
 
 fn main() {
     let my_str = "hello";
-    let res = colorize!(Fn->"none", "some", my_str, String::from("good"));
+    let res = colorize!(Fg->"none", b->"some", my_str, BgFg->String::from("good"));
     println!("{}", res);
 }

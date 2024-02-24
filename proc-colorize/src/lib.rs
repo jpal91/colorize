@@ -8,8 +8,6 @@ use syn::token::Token;
 use syn::Error;
 use syn::{parse_macro_input, Expr, Ident, Result, Token, TypePath};
 
-type TT<'a> = &'a (dyn quote::ToTokens);
-
 #[derive(Debug)]
 struct Item {
     ident: Ident,
@@ -21,9 +19,6 @@ struct Item {
 enum Items {
     Item(Item),
     Expr(Expr),
-    Ident(Ident),
-    Path(TypePath),
-    Any(proc_macro2::TokenStream),
 }
 
 impl Parse for Item {
@@ -40,22 +35,17 @@ impl Parse for Items {
     fn parse(input: ParseStream) -> Result<Self> {
         if input.peek(Ident) && input.peek2(Token![->]) {
             input.parse().map(Items::Item)
-        // } else if input.peek(Ident) {
-        //     input.parse().map(Items::Ident)
-        // } else if input.peek(syn::Stmt::Expr) {
         } else {
-            // input.parse().map(Items::Expr)
-            input.parse().map(Items::Any)
+            input.parse().map(Items::Expr)
         }
     }
 }
 
-fn color_str(input: Expr, tag: Ident) -> Result<proc_macro2::TokenStream> {
+fn color_str(input: &Expr, tag: &Ident) -> Result<proc_macro2::TokenStream> {
     let str_tag = tag.to_string();
     let mut it = str_tag.chars().peekable();
     let mut attr: Vec<&str> = vec![];
     let mut newline = "";
-    // let input = format!("{:?}", input).replace('\"', "");
 
     while let Some(m) = it.next() {
         match m {
@@ -70,7 +60,12 @@ fn color_str(input: Expr, tag: Ident) -> Result<proc_macro2::TokenStream> {
                         'm' => "35",
                         'c' => "36",
                         'w' => "37",
-                        _ => return Err(Error::new(tag.span(), "Invalid format")),
+                        e => {
+                            return Err(Error::new(
+                                tag.span(),
+                                format!("'F{e}' Invalid foreground option - '{e}'"),
+                            ))
+                        }
                     };
                     if !col.is_empty() {
                         it.next();
@@ -89,7 +84,12 @@ fn color_str(input: Expr, tag: Ident) -> Result<proc_macro2::TokenStream> {
                         'm' => "45",
                         'c' => "46",
                         'w' => "47",
-                        _ => return Err(Error::new(tag.span(), "Invalid format")),
+                        e => {
+                            return Err(Error::new(
+                                tag.span(),
+                                format!("'B{e}' Invalid background option - '{e}'"),
+                            ))
+                        }
                     };
                     if !col.is_empty() {
                         it.next();
@@ -101,64 +101,50 @@ fn color_str(input: Expr, tag: Ident) -> Result<proc_macro2::TokenStream> {
             'i' => attr.push("3"),
             'u' => attr.push("4"),
             'N' => newline = "\n",
-            _ => {}
+            _ => {
+                return Err(Error::new(
+                    tag.span(),
+                    format!("Invalid format identifier '{m}'"),
+                ))
+            }
         }
     }
 
     let attrs = attr.join(";");
 
-    Ok(
-        quote! {format!("{}\x1b[{}m{}\x1b[0m", #newline, #attrs, format!("{:?}", #input).replace('\"', ""))},
-    )
+    Ok(quote! {
+        format!(
+            "{}\x1b[{}m{}\x1b[0m",
+            #newline,
+            #attrs,
+            format!("{:?}", #input).replace('\"', "")
+        )
+    })
 }
 
+#[allow(clippy::let_and_return)]
 #[proc_macro]
 pub fn colorize(input: TokenStream) -> TokenStream {
-    // println!("{:?}", input);
-    // let inp = input.clone();
-    // // let args = Punctuated::<Expr, Token![,]>::parse_terminated.parse(inp).unwrap();
-    // let args = parse_macro_input!(inp as syn::Macro);
-    // println!("{:?}", args);
-
-    let parser = Punctuated::<Expr, Token![,]>::parse_terminated;
-    let args = match parser.parse(input) {
-        Ok(e) => e,
-        Err(e) => return quote! {""}.into(), //return e.into_compile_error().into()
-    };
+    let args = parse_macro_input!(input with Punctuated::<Items, Token![,]>::parse_terminated);
 
     let mut res: Vec<proc_macro2::TokenStream> = vec![];
-    println!("here {:?}", args);
-    // for a in args.iter() {
-    //     match a {
-    //         Items::Item(item) => {
-    //             match color_str(item.msg.clone(), item.ident.clone()) {
-    //                 Ok(r) => res.push(r),
-    //                 Err(e) => return e.into_compile_error().into()
-    //             }
-    //         },
-    //         Items::Any(item) => {
-    //             res.push(quote!{ format!("{:?}", #item)})
-    //         },
-    //         Items::Ident(item) => {
-    //             res.push(item.to_token_stream())
-    //         }
-    //         _ => {}
-    //     }
-    // }
 
-    println!("{:?}", res);
-    // let some = format!("thing", "{}")
-    // let res = quote!{
-    //     [#(
-    //         #res
-    //     ),*].join(" ")
-    // }.into();
-    // println!("{:?}", res);
-    // res
-    // args.to_token_stream().into()
-    // TokenStream::new()
-    quote! {
-        "ehllo"
+    for a in args.iter() {
+        match a {
+            Items::Item(item) => match color_str(&item.msg, &item.ident) {
+                Ok(r) => res.push(r),
+                Err(e) => return e.into_compile_error().into(),
+            },
+            Items::Expr(expr) => res.push(quote! { format!("{:?}", #expr).replace("\"", "") }),
+        }
     }
-    .into()
+
+    let res = quote! {
+        [#(
+            #res
+        ),*].join(" ")
+    }
+    .into();
+
+    res
 }

@@ -9,19 +9,19 @@ use syn::Error;
 use syn::{parse_macro_input, Expr, Ident, Result, Token, TypePath};
 
 #[derive(Debug)]
-struct Item {
+struct ColorizeItem {
     ident: Ident,
     sep: Token![->],
     msg: Expr,
 }
 
 #[derive(Debug)]
-enum Items {
-    Item(Item),
+enum Args {
+    Item(ColorizeItem),
     Expr(Expr),
 }
 
-impl Parse for Item {
+impl Parse for ColorizeItem {
     fn parse(input: ParseStream) -> Result<Self> {
         Ok(Self {
             ident: input.parse()?,
@@ -31,12 +31,12 @@ impl Parse for Item {
     }
 }
 
-impl Parse for Items {
+impl Parse for Args {
     fn parse(input: ParseStream) -> Result<Self> {
         if input.peek(Ident) && input.peek2(Token![->]) {
-            input.parse().map(Items::Item)
+            input.parse().map(Args::Item)
         } else {
-            input.parse().map(Items::Expr)
+            input.parse().map(Args::Expr)
         }
     }
 }
@@ -125,17 +125,17 @@ fn color_str(input: &Expr, tag: &Ident) -> Result<proc_macro2::TokenStream> {
 #[allow(clippy::let_and_return)]
 #[proc_macro]
 pub fn colorize(input: TokenStream) -> TokenStream {
-    let args = parse_macro_input!(input with Punctuated::<Items, Token![,]>::parse_terminated);
+    let args = parse_macro_input!(input with Punctuated::<Args, Token![,]>::parse_terminated);
 
     let mut res: Vec<proc_macro2::TokenStream> = vec![];
 
     for a in args.iter() {
         match a {
-            Items::Item(item) => match color_str(&item.msg, &item.ident) {
+            Args::Item(item) => match color_str(&item.msg, &item.ident) {
                 Ok(r) => res.push(r),
                 Err(e) => return e.into_compile_error().into(),
             },
-            Items::Expr(expr) => res.push(quote! { format!("{:?}", #expr).replace("\"", "") }),
+            Args::Expr(expr) => res.push(quote! { format!("{:?}", #expr).replace("\"", "") }),
         }
     }
 

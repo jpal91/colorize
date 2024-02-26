@@ -22,7 +22,7 @@ doc = false
 
 [dependencies]
 paste = "1.0.14"
-proc-colorize = { path = "proc-colorize", default-features = false, optional = true }
+proc-colorize = { version = "^0.1.0", path = "proc-colorize", default-features = false, optional = true }
 
 [features]
 default = []

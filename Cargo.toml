@@ -9,7 +9,7 @@ repository = "https://github.com/jpal91/colorize"
 license = "MIT"
 keywords = ["ansi", "color", "macros"]
 categories = ["command-line-interface"]
-exclude = [".github/**"]
+exclude = [".github/**", "main.rs"]
 
 [lib]
 name = "colorize"
@@ -18,7 +18,15 @@ path = "src/lib.rs"
 [[bin]]
 name = "workshop"
 path = "main.rs"
+doc = false
 
 [dependencies]
 paste = "1.0.14"
-proc-colorize = { path = "proc-colorize" }
+proc-colorize = { path = "proc-colorize", default-features = false, optional = true }
+
+[features]
+default = []
+proc = ["dep:proc-colorize"]
+
+[package.metadata.docs.rs]
+features = ["default"]

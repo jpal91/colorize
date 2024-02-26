@@ -1,13 +1,13 @@
-#![allow(unused)]
 use proc_macro::TokenStream;
-use proc_macro2::TokenTree;
-use quote::{format_ident, quote, ToTokens};
-use syn::parse::{Parse, ParseStream, Parser};
-use syn::punctuated::Punctuated;
-use syn::token::Token;
-use syn::Error;
-use syn::{parse_macro_input, Expr, Ident, Result, Token, TypePath};
+use quote::{format_ident, quote};
+use syn::{
+    parse::{Parse, ParseStream},
+    parse_macro_input,
+    punctuated::Punctuated,
+    Error, Expr, Ident, Result, Token,
+};
 
+#[allow(dead_code)]
 #[derive(Debug)]
 struct ColorizeAll {
     ident: Ident,
@@ -15,6 +15,7 @@ struct ColorizeAll {
     rest: TokenStream,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 struct ColorizeItem {
     ident: Ident,

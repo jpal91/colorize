@@ -177,10 +177,14 @@ pub fn color_str<T: std::fmt::Debug>(input: T, tag: &str) -> String {
 /// let color_string = colorize!(iFb->"Hello", Fmu->"world", ", it's me!");
 /// assert_eq!(String::from("\x1b[3;34mHello\x1b[0m \x1b[35;4mworld\x1b[0m , it's me!"), color_string);
 /// ```
+#[cfg(not(feature = "proc"))]
 #[macro_export]
 macro_rules! colorize {
     ( $($any:tt)* ) => { $crate::macro_colorize!([]; $($any)*, ) };
 }
+
+#[cfg(feature = "proc")]
+pub use proc_colorize::colorize;
 
 /// `println!` using the [`colorize!`] macro
 ///
@@ -208,7 +212,7 @@ mod tests {
 
     #[test]
     fn test_print_color() {
-        print_color!(Fr->"testing", Fbbi->"testing1", b->"testing2", x->"testing3", "testing4", Fgbu->"testing5");
+        print_color!(Fr->"testing", Fbbi->"testing1", b->"testing2", "testing3", "testing4", Fgbu->"testing5");
         print_color!("hello");
     }
 

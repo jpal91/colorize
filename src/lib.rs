@@ -196,7 +196,7 @@ macro_rules! colorize {
 }
 
 #[cfg(feature = "proc")]
-pub use proc_colorize::colorize;
+pub use colorize_proc_macro::colorize;
 
 /// `println!` using the [`colorize!`] macro
 ///

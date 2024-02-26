@@ -1,12 +1,19 @@
 #![allow(unused)]
 use proc_macro::TokenStream;
 use proc_macro2::TokenTree;
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 use syn::parse::{Parse, ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::token::Token;
 use syn::Error;
 use syn::{parse_macro_input, Expr, Ident, Result, Token, TypePath};
+
+#[derive(Debug)]
+struct ColorizeAll {
+    ident: Ident,
+    tok: Token![=>],
+    rest: TokenStream,
+}
 
 #[derive(Debug)]
 struct ColorizeItem {
@@ -19,6 +26,16 @@ struct ColorizeItem {
 enum Args {
     Item(ColorizeItem),
     Expr(Expr),
+}
+
+impl Parse for ColorizeAll {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Ok(Self {
+            ident: input.parse()?,
+            tok: input.parse()?,
+            rest: input.parse::<proc_macro2::TokenStream>()?.into(),
+        })
+    }
 }
 
 impl Parse for ColorizeItem {
@@ -113,29 +130,117 @@ fn color_str(input: &Expr, tag: &Ident) -> Result<proc_macro2::TokenStream> {
     let attrs = attr.join(";");
 
     Ok(quote! {
-        format!(
+        ::std::format!(
             "{}\x1b[{}m{}\x1b[0m",
             #newline,
             #attrs,
-            format!("{:?}", #input).replace('\"', "")
+            ::std::format!("{:?}", #input).replace('\"', "")
         )
     })
+}
+
+fn valid_color_all(tag: &Ident) -> Result<()> {
+    let str_tag = tag.to_string();
+    let mut it = str_tag.chars().peekable();
+
+    while let Some(t) = it.next() {
+        match t {
+            'b' | 'i' | 'u' | 'N' => continue,
+            'F' => {
+                if let Some(n) = it.peek() {
+                    match n {
+                        'k' | 'r' | 'g' | 'y' | 'b' | 'm' | 'c' | 'w' => continue,
+                        e => {
+                            return Err(Error::new(
+                                tag.span(),
+                                format!("'F{e}' Invalid foreground option - '{e}'"),
+                            ))
+                        }
+                    }
+                } else {
+                    return Err(Error::new(
+                        tag.span(),
+                        "Forground option must be followed by a valid identifier",
+                    ));
+                }
+            }
+            'B' => {
+                if let Some(n) = it.peek() {
+                    match n {
+                        'k' | 'r' | 'g' | 'y' | 'b' | 'm' | 'c' | 'w' => continue,
+                        e => {
+                            return Err(Error::new(
+                                tag.span(),
+                                format!("'B{e}' Invalid background option - '{e}'"),
+                            ))
+                        }
+                    }
+                } else {
+                    return Err(Error::new(
+                        tag.span(),
+                        "Background option must be followed by a valid identifier",
+                    ));
+                }
+            }
+            _ => {
+                return Err(Error::new(
+                    tag.span(),
+                    format!("Invalid format identifier '{t}'"),
+                ))
+            }
+        }
+    }
+    Ok(())
 }
 
 #[allow(clippy::let_and_return)]
 #[proc_macro]
 pub fn colorize(input: TokenStream) -> TokenStream {
-    let args = parse_macro_input!(input with Punctuated::<Args, Token![,]>::parse_terminated);
+    let inp = input.clone();
+
+    let (args, id) = match syn::parse::<ColorizeAll>(inp) {
+        Ok(r) => {
+            if let Err(e) = valid_color_all(&r.ident) {
+                e.into_compile_error();
+            }
+            let rem = r.rest;
+            let a = parse_macro_input!(rem with Punctuated::<Args, Token![,]>::parse_terminated);
+
+            (a, Some(r.ident))
+        }
+        Err(_) => {
+            let a = parse_macro_input!(input with Punctuated::<Args, Token![,]>::parse_terminated);
+            (a, None)
+        }
+    };
 
     let mut res: Vec<proc_macro2::TokenStream> = vec![];
 
     for a in args.iter() {
         match a {
-            Args::Item(item) => match color_str(&item.msg, &item.ident) {
-                Ok(r) => res.push(r),
-                Err(e) => return e.into_compile_error().into(),
-            },
-            Args::Expr(expr) => res.push(quote! { format!("{:?}", #expr).replace("\"", "") }),
+            Args::Item(item) => {
+                let ident = if let Some(ref i) = id {
+                    let new_id = format_ident!("{}{}", i, &item.ident, span = item.ident.span());
+                    new_id
+                } else {
+                    item.ident.clone()
+                };
+
+                match color_str(&item.msg, &ident) {
+                    Ok(r) => res.push(r),
+                    Err(e) => return e.into_compile_error().into(),
+                }
+            }
+            Args::Expr(expr) => {
+                if let Some(ref i) = id {
+                    match color_str(expr, i) {
+                        Ok(r) => res.push(r),
+                        Err(e) => return e.into_compile_error().into(),
+                    }
+                } else {
+                    res.push(quote! { ::std::format!("{:?}", #expr).replace("\"", "") })
+                }
+            }
         }
     }
 

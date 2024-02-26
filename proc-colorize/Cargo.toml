@@ -3,7 +3,7 @@ name = "colorize-proc-macro"
 version = "0.1.0"
 edition = "2021"
 description = "Proc macro version of colorize from the colorize-macros package"
-licence = "MIT"
+licence-file = "../LICENSE"
 repository = "https://github.com/jpal91/colorize"
 documentation = "https://docs.rs/colorize-macros/latest/colorize/"
 

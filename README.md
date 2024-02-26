@@ -61,9 +61,28 @@ print_color!(b => "Moving", Fy->user_path, "to", Fg->PathBuf::from("/home/new_co
 
 See the [colorize macro](https://docs.rs/colorize-macros/latest/colorize/macro.colorize.html) docs for further style specs.
 
+## New in v.0.7.0 - `proc` feature
+The `colorize` macro was re-worked as a `proc macro` to allow for better error handling during the development process. Using the new `colorize` proc macro, you
+will see errors during the development process indicating a bad formatting option instead of after you compile/run your code.
+
+![compile-error](assets/compile-error.jpg)
+
+To use the new `proc` feature simply add the feature either -
+```bash
+cargo add colorize-macros --features proc
+```
+
+Or add the `proc` feature in your `Cargo.toml`
+```toml
+[depedencies]
+...
+colorize-macros = { version = "^0.7.0" features = ["proc"]}
+```
+
+No additional changes are needed in your code as the new `proc` version will simply replace the old `colorize` import. This goes for the `print_color` macro as well.
+
 ## Development
 - [x] Add background color
-- [ ] Rework the `colorize!` macro or create a new macro so it acts more like `format!`
 - [x] Add ability to format multiple arguments with the same input (ie `colorize!(b => "Hello", Fg-> "world")` where "Hello" and "world" are both bold but "world" is the only word that's green)
 - [ ] Integrate a color set of log macros from the [log](https://docs.rs/log/latest/log/) crate
 

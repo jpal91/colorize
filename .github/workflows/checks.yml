@@ -61,6 +61,13 @@ jobs:
         continue-on-error: false
         with:
           command: test
+      
+      - name: Run cargo test for proc feature
+        uses: actions-rs/cargo@v1
+        continue-on-error: false
+        with:
+          command: test
+          args: --features proc
 
   lints:
     needs: pre_job

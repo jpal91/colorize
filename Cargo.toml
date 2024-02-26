@@ -22,11 +22,11 @@ doc = false
 
 [dependencies]
 paste = "1.0.14"
-proc-colorize = { version = "^0.1.0", path = "proc-colorize", default-features = false, optional = true }
+colorize-proc-macro = { version = "^0.1.0", path = "proc-colorize", default-features = false, optional = true }
 
 [features]
 default = []
-proc = ["dep:proc-colorize"]
+proc = ["dep:colorize-proc-macro"]
 
 [package.metadata.docs.rs]
 features = ["default"]

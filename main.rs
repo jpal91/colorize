@@ -1,4 +1,4 @@
-// #![allow(unused)]
+#![allow(unused)]
 // use proc_colorize::colorize;
 // use colorize::colorize;
 

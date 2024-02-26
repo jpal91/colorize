@@ -1,7 +1,7 @@
 workspace = { members = ["proc-colorize"] }
 [package]
 name = "colorize-macros"
-version = "0.6.4"
+version = "0.7.0"
 edition = "2021"
 description = "A set of Rust macros to assist in turning text into colors for printing on the terminal."
 readme = "README.md"
@@ -9,7 +9,7 @@ repository = "https://github.com/jpal91/colorize"
 license = "MIT"
 keywords = ["ansi", "color", "macros"]
 categories = ["command-line-interface"]
-exclude = [".github/**", "main.rs"]
+exclude = [".github/**", "main.rs", "assets/**"]
 
 [lib]
 name = "colorize"

@@ -7,7 +7,6 @@ description = "A set of Rust macros to assist in turning text into colors for pr
 readme = "README.md"
 repository = "https://github.com/jpal91/colorize"
 license = "MIT"
-license-file = "LICENSE"
 keywords = ["ansi", "color", "macros"]
 categories = ["command-line-interface"]
 exclude = [".github/**", "main.rs", "assets/**"]
@@ -15,11 +14,6 @@ exclude = [".github/**", "main.rs", "assets/**"]
 [lib]
 name = "colorize"
 path = "src/lib.rs"
-
-[[bin]]
-name = "workshop"
-path = "main.rs"
-doc = false
 
 [dependencies]
 paste = "1.0.14"

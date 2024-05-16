@@ -140,7 +140,7 @@ fn valid_color_all(tag: &Ident) -> Result<()> {
 /// `colorize!` takes a series of inputs, with or without tokens, and converts the inputs into a `String` with ANSI escape sequences added in.
 ///
 /// The returned `String` is primarily useful for printing out to a terminal which is capable of showing color.
-/// However, if all you want to do is print, and want to cut out the extra code, use [`print_color`] instead.
+/// However, if all you want to do is print, and want to cut out the extra code, use `print_color` instead.
 ///
 /// ## Valid inputs
 /// `colorize!` uses the same formatting style as [`format!`](std::format!) so it follows the same
@@ -182,9 +182,9 @@ fn valid_color_all(tag: &Ident) -> Result<()> {
 ///
 /// #### Special Newline Token
 /// If you want to add a newline  within the string, include a `N` token at the start
-/// of the word(s) you wish to be on the newline.
+/// of the word(s) you wish to be on the newline. This is the same as just adding '\n' to the
+/// string, so it's up to you to use it or not.
 ///
-/// **Adding the actual `\n` character will cause issues, use the token!!**
 ///
 /// Example -
 /// ```
@@ -196,6 +196,14 @@ fn valid_color_all(tag: &Ident) -> Result<()> {
 ///     b->"Hello", // First line
 ///     Nb->"world, it's me!" // "world..." will be on the new line
 /// );
+///
+/// let same_color_string = colorize!(
+///    "{} \n{}",
+///    b->"Hello",
+///    b->"world, it's me!"
+/// );
+///
+/// assert_eq!(color_string, same_color_string);
 /// ```
 ///
 /// #### Format Multiple Inputs

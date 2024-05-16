@@ -46,9 +46,9 @@
 //!
 //! #### Special Newline Token
 //! If you want to add a newline  within the string, include a `N` token at the start
-//! of the word(s) you wish to be on the newline.
+//! of the word(s) you wish to be on the newline. This is the same as just adding '\n' to the
+//! string, so it's up to you to use it or not.
 //!
-//! **Adding the actual `\n` character will cause issues, use the token!!**
 //!
 //! Example -
 //! ```
@@ -60,6 +60,14 @@
 //!     b->"Hello", // First line
 //!     Nb->"world, it's me!" // "world..." will be on the new line
 //! );
+//!
+//! let same_color_string = colorize!(
+//!    "{} \n{}",
+//!    b->"Hello",
+//!    b->"world, it's me!"
+//! );
+//!
+//! assert_eq!(color_string, same_color_string);
 //! ```
 //!
 //! #### Format Multiple Inputs

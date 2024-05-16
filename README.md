@@ -39,7 +39,7 @@ assert_eq!(
 // Add a format token to multiple inputs using `=>`
 // The below example will produce "Hello" with a green foreground, 
 // "world" with a blue background, both in bold. 
-let color_string = colorize!("{}, {}"b => Fg->"Hello", Bb->"world");
+let color_string = colorize!("{}, {}", b => Fg->"Hello", Bb->"world");
 assert_eq!(
     String::from("\x1b[1;32mHello\x1b[0m \x1b[1;44mworld\x1b[0m"),
     color_string

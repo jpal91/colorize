@@ -1,10 +1,9 @@
 [package]
 name = "colorize-proc-macro"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "Proc macro version of colorize from the colorize-macros package"
 license = "MIT"
-licence-file = "../LICENSE"
 repository = "https://github.com/jpal91/colorize"
 documentation = "https://docs.rs/colorize-macros/latest/colorize/"
 
@@ -16,4 +15,4 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "^1.0.70"
 quote = "^1.0.30"
-syn = { version="^2.0.48", features = ["parsing", "extra-traits", "full"] }
+syn = { version = "^2.0.48", features = ["parsing", "extra-traits", "full"] }

@@ -1,6 +1,6 @@
 [package]
 name = "colorize-proc-macro"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "Proc macro version of colorize from the colorize-macros package"
 license = "MIT"

@@ -1,4 +1,5 @@
 [![crates.io](https://img.shields.io/crates/v/colorize-macros?style=for-the-badge&logo=rust)](https://crates.io/crates/colorize-macros)
+[![CI](https://img.shields.io/github/actions/workflow/status/jpal91/colorize/checks.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/jpal91/colorize/actions/workflows/checks.yml)
 [![docs.rs](https://img.shields.io/badge/docs.rs-colorize--macros-mediumslateblue?style=for-the-badge&logo=docs.rs)](https://docs.rs/colorize-macros/latest/colorize)
 
 

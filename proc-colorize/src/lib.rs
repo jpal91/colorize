@@ -7,6 +7,7 @@ use syn::{
 };
 
 mod colors;
+mod fstring;
 
 #[allow(dead_code)]
 #[derive(Debug)]

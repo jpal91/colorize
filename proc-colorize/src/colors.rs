@@ -1,6 +1,7 @@
 use quote::{format_ident, quote};
-use syn::{punctuated::Punctuated, token::Comma, Error, Expr, Ident, LitStr, Result};
+use syn::{punctuated::Punctuated, token::Comma, Error, Ident, LitStr, Result};
 
+use crate::fstring::{placeholders, ArgRef};
 use crate::Args;
 
 fn color_str(tag: &Ident) -> Result<String> {
@@ -82,72 +83,51 @@ pub fn parse_fstring(
     args: Punctuated<Args, Comma>,
     id: Option<Ident>,
 ) -> Result<proc_macro2::TokenStream> {
-    let mut chars: Vec<u8> = vec![];
-    let mut fstring_args: Vec<Expr> = vec![];
-    let mut open = false;
-    let mut args = args.into_iter();
-    let mut add_closer = false;
+    let value = fstring.value();
+    let placeholders = placeholders(&value).map_err(|msg| Error::new(fstring.span(), msg))?;
+    let args: Vec<Args> = args.into_iter().collect();
 
-    for ch in fstring.value().as_bytes().iter() {
-        match ch {
-            b'{' => {
-                if open {
-                    return Err(Error::new(
-                        fstring.span(),
-                        "One or more of your '{}' args are not closed",
-                    ));
-                }
+    let mut out = String::with_capacity(value.len());
+    let mut last = 0;
 
-                open = true;
+    for placeholder in placeholders {
+        out.push_str(&value[last..placeholder.range.start]);
 
-                match &args.next() {
-                    Some(Args::Item(item)) => {
-                        let ident = if let Some(ref i) = id {
-                            format_ident!("{}{}", i, &item.ident, span = item.ident.span())
-                        } else {
-                            item.ident.clone()
-                        };
-                        let prefix = color_str(&ident);
-                        chars.extend(prefix?.as_bytes());
-                        fstring_args.push(item.msg.to_owned());
-                        add_closer = true;
-                    }
-                    Some(Args::Expr(ex)) => {
-                        if let Some(ref i) = id {
-                            let prefix = color_str(i);
-                            chars.extend(prefix?.as_bytes());
-                            add_closer = true;
-                        }
-                        fstring_args.push(ex.to_owned());
-                    }
-                    None => {}
-                };
-                chars.push(ch.to_owned());
+        // Style follows the argument the placeholder refers to, plus any `tag =>` prefix
+        let own = match placeholder.arg {
+            ArgRef::Index(n) => match args.get(n) {
+                Some(Args::Item(item)) => Some(&item.ident),
+                _ => None,
+            },
+            ArgRef::Name(_) => None,
+        };
+        let tag = match (&id, own) {
+            (Some(all), Some(own)) => Some(format_ident!("{}{}", all, own, span = own.span())),
+            (Some(all), None) => Some(all.clone()),
+            (None, own) => own.cloned(),
+        };
+
+        let text = &value[placeholder.range.clone()];
+        match tag {
+            Some(tag) => {
+                out.push_str(&color_str(&tag)?);
+                out.push_str(text);
+                out.push_str("\x1b[0m");
             }
-            b'}' => {
-                if !open {
-                    return Err(Error::new(
-                        fstring.span(),
-                        "One or more of your '{}' args are not closed",
-                    ));
-                }
-                open = false;
-                chars.push(ch.to_owned());
-
-                if add_closer {
-                    chars.extend(b"\x1b[0m");
-                    add_closer = false;
-                }
-            }
-            any => chars.push(any.to_owned()),
+            None => out.push_str(text),
         }
+        last = placeholder.range.end;
     }
+    out.push_str(&value[last..]);
 
-    let fstring = String::from_utf8(chars).unwrap();
+    let fstring_args = args.into_iter().map(|arg| match arg {
+        Args::Item(item) => item.msg,
+        Args::Expr(ex) => ex,
+    });
 
     Ok(quote! {
         ::std::format!(
-            #fstring,
+            #out,
             #(
                 #fstring_args
             ),*

@@ -124,7 +124,7 @@ macro_rules! print_color {
 mod tests {
     use std::str::FromStr;
 
-    use super::{colorize, print_color};
+    use super::colorize;
 
     #[test]
     fn test_colorize() {

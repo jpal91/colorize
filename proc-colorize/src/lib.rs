@@ -175,7 +175,7 @@ fn valid_color_all(tag: &Ident) -> Result<()> {
 /// 2. Fr/Br -> red
 /// 3. Fg/Bg -> green
 /// 4. Fy/By -> yellow
-/// 5. Fm/By -> magenta
+/// 5. Fm/Bm -> magenta
 /// 6. Fc/Bc -> cyan
 /// 7. Fw/Bw -> white
 /// 8. Fk/Bk -> black

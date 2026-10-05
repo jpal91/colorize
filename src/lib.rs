@@ -96,10 +96,6 @@
 //! assert_eq!(String::from("\x1b[3;34mHello\x1b[0m \x1b[35;4mworld\x1b[0m , it's me!"), color_string);
 //! ```
 
-#[doc(hidden)]
-#[allow(unused)]
-pub use paste::paste;
-
 pub use colorize_proc_macro::colorize;
 
 // Compile and run the README examples as doctests so they can't drift.

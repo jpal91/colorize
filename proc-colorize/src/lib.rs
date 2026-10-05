@@ -9,27 +9,22 @@ use syn::{
 mod colors;
 mod fstring;
 
-#[allow(dead_code)]
-#[derive(Debug)]
+/// A format string followed by the rest of the input.
 struct WithFormatString {
     fstring: LitStr,
-    sep: Token![,],
     rest: TokenStream,
 }
 
-#[allow(dead_code)]
-#[derive(Debug)]
+/// A `tag =>` prefix applying a style to every argument.
 struct ColorizeAll {
     ident: Ident,
-    tok: Token![=>],
     rest: TokenStream,
 }
 
-#[allow(dead_code)]
+/// A `tag->value` argument.
 #[derive(Debug)]
 pub(crate) struct ColorizeItem {
     pub ident: Ident,
-    pub sep: Token![->],
     pub msg: Expr,
 }
 
@@ -41,9 +36,10 @@ pub(crate) enum Args {
 
 impl Parse for WithFormatString {
     fn parse(input: ParseStream) -> Result<Self> {
+        let fstring = input.parse()?;
+        input.parse::<Token![,]>()?;
         Ok(Self {
-            fstring: input.parse()?,
-            sep: input.parse()?,
+            fstring,
             rest: input.parse::<proc_macro2::TokenStream>()?.into(),
         })
     }
@@ -51,9 +47,10 @@ impl Parse for WithFormatString {
 
 impl Parse for ColorizeAll {
     fn parse(input: ParseStream) -> Result<Self> {
+        let ident = input.parse()?;
+        input.parse::<Token![=>]>()?;
         Ok(Self {
-            ident: input.parse()?,
-            tok: input.parse()?,
+            ident,
             rest: input.parse::<proc_macro2::TokenStream>()?.into(),
         })
     }
@@ -61,9 +58,10 @@ impl Parse for ColorizeAll {
 
 impl Parse for ColorizeItem {
     fn parse(input: ParseStream) -> Result<Self> {
+        let ident = input.parse()?;
+        input.parse::<Token![->]>()?;
         Ok(Self {
-            ident: input.parse()?,
-            sep: input.parse()?,
+            ident,
             msg: input.parse()?,
         })
     }
@@ -243,7 +241,7 @@ pub fn colorize(input: TokenStream) -> TokenStream {
     let (args, id) = match syn::parse::<ColorizeAll>(inp.clone()) {
         Ok(r) => {
             if let Err(e) = valid_color_all(&r.ident) {
-                e.into_compile_error();
+                return e.into_compile_error().into();
             }
             let rem = r.rest;
             let a = parse_macro_input!(rem with Punctuated::<Args, Token![,]>::parse_terminated);

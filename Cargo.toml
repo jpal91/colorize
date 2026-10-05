@@ -9,7 +9,7 @@ repository = "https://github.com/jpal91/colorize"
 license = "MIT"
 keywords = ["ansi", "color", "macros"]
 categories = ["command-line-interface"]
-exclude = [".github/**", "main.rs", "assets/**"]
+exclude = [".github/**", "assets/**"]
 
 [lib]
 name = "colorize"
@@ -17,6 +17,5 @@ path = "src/lib.rs"
 
 
 [dependencies]
-paste = "1.0.14"
 colorize-proc-macro = { version = "^0.2.0", path = "proc-colorize" }
 

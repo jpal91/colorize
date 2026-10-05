@@ -1,4 +1,5 @@
 [![crates.io](https://img.shields.io/crates/v/colorize-macros?style=for-the-badge&logo=rust)](https://crates.io/crates/colorize-macros)
+[![CI](https://img.shields.io/github/actions/workflow/status/jpal91/colorize/checks.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/jpal91/colorize/actions/workflows/checks.yml)
 [![docs.rs](https://img.shields.io/badge/docs.rs-colorize--macros-mediumslateblue?style=for-the-badge&logo=docs.rs)](https://docs.rs/colorize-macros/latest/colorize)
 
 
@@ -6,12 +7,14 @@
 
 A set of Rust macros to assist in turning text into colors for printing on the terminal. 
 
+![Terminal output of `cargo run --example demo`](https://raw.githubusercontent.com/jpal91/colorize/main/assets/demo.png)
+
 ## Purpose
 
 As I was working with another command line utility, I wanted the ability to convert regular text into ANSI color formatted text more easily, so I wrote a series of macros to help with formatting and/or printing that could be reusable.
 
 ## Adding
-You can add the macros to your project by using `cargo` or adding `colorize-macros` to your depedencies.
+You can add the macros to your project by using `cargo` or adding `colorize-macros` to your dependencies.
 
 ```bash
 cargo add colorize-macros
@@ -32,7 +35,7 @@ print_color!("{}", Fgb->"Hello world");
 // Returns "Hello" in italic blue and "World" underlined in magenta
 let color_string = colorize!("{} {}", iFb->"Hello", Fmu->"World");
 assert_eq!(
-    String::from("\x1b[3;34mHello\x1b[0m \x1b[4;35mWorld\x1b[0m"), 
+    String::from("\x1b[3;34mHello\x1b[0m \x1b[35;4mWorld\x1b[0m"), 
     color_string
 );
 
@@ -41,7 +44,7 @@ assert_eq!(
 // "world" with a blue background, both in bold. 
 let color_string = colorize!("{}, {}", b => Fg->"Hello", Bb->"world");
 assert_eq!(
-    String::from("\x1b[1;32mHello\x1b[0m \x1b[1;44mworld\x1b[0m"),
+    String::from("\x1b[1;32mHello\x1b[0m, \x1b[1;44mworld\x1b[0m"),
     color_string
 );
 
@@ -55,8 +58,10 @@ assert_eq!(
     pretty_path
 );
 
-print_color!("{} {} {:?}"b => "Moving", Fy->user_path, "to", Fg->PathBuf::from("/home/new_color_dir/my_second_file.txt"));
+print_color!("{} {:?} {} {:?}", b => "Moving", Fy->user_path, "to", Fg->PathBuf::from("/home/new_color_dir/my_second_file.txt"));
 ```
+
+Clone the repo and run `cargo run --example demo` to see these in your own terminal.
 
 See the [colorize macro](https://docs.rs/colorize-macros/latest/colorize/macro.colorize.html) docs for further style specs.
 

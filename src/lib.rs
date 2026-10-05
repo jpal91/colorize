@@ -39,7 +39,7 @@
 //! 2. Fr/Br -> red
 //! 3. Fg/Bg -> green
 //! 4. Fy/By -> yellow
-//! 5. Fm/By -> magenta
+//! 5. Fm/Bm -> magenta
 //! 6. Fc/Bc -> cyan
 //! 7. Fw/Bw -> white
 //! 8. Fk/Bk -> black
@@ -96,11 +96,12 @@
 //! assert_eq!(String::from("\x1b[3;34mHello\x1b[0m \x1b[35;4mworld\x1b[0m , it's me!"), color_string);
 //! ```
 
-#[doc(hidden)]
-#[allow(unused)]
-pub use paste::paste;
-
 pub use colorize_proc_macro::colorize;
+
+// Compile and run the README examples as doctests so they can't drift.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;
 
 /// `println!` using the [`colorize!`] macro
 ///
@@ -124,7 +125,7 @@ macro_rules! print_color {
 mod tests {
     use std::str::FromStr;
 
-    use super::{colorize, print_color};
+    use super::colorize;
 
     #[test]
     fn test_colorize() {
